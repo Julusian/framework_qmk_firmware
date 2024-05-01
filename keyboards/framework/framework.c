@@ -65,6 +65,7 @@ void suspend_wakeup_init_kb(void) {
 #endif
 }
 
+/*
 // If in BIOS mode, no matter what the keys have been remapped to, always send them as the F keys
 bool bios_mode = true;
 void set_bios_mode(bool val) {
@@ -318,3 +319,4 @@ bool led_update_kb(led_t led_state) {
     return false;
 }
 #endif
+*/

@@ -1,7 +1,7 @@
 # VIA support uses raw HID, don't need to enable it extra.
 # Only when disabling VIA but still wanting to use RAW, need to enable it here.
-VIA_ENABLE = yes
-RAW_ENABLE = no
+VIA_ENABLE = no
+RAW_ENABLE = yes
 
 # Enabled in info.json
 # EXTRAKEY_ENABLE = yes          # Audio control and System control
@@ -12,7 +12,7 @@ RAW_ENABLE = no
 BACKLIGHT_ENABLE = yes
 BACKLIGHT_DRIVER = pwm
 
-OS_DETECTION_ENABLE = yes
+OS_DETECTION_ENABLE = no
 #OS_DETECTION_DEBUG_ENABLE = yes
 
 # Custom matrix scanning code via ADC

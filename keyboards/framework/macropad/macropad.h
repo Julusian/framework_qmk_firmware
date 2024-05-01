@@ -17,7 +17,5 @@
 }
 
 enum _layers {
-  _NUMLOCK,
-  _FN,
   _FACTORY,
 };

@@ -3,6 +3,8 @@
 
 #include QMK_KEYBOARD_H
 
+#include "raw_hid.h"
+
 #if defined(RGB_MATRIX_ENABLE)
 const is31_led g_is31_leds[RGB_MATRIX_LED_COUNT] = {
 /* Refer to IS31 manual for these locations
@@ -77,16 +79,54 @@ led_config_t g_led_config = { {
   { 150,  37 }, // LED 24
 }, {
   // LED Index to Flag
-  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
-  4, 4, 4, 4, 4, 4, 4, 4
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0
 } };
 #endif
 
 void keyboard_post_init_user(void) {
-    // Sync initial numlock state from the host
-    if (host_keyboard_led_state().num_lock) {
-        layer_on(_NUMLOCK);
-    } else {
-        layer_off(_FN);
+  // setup as sane layout
+  layer_on(_FACTORY);
+
+  rgb_matrix_enable();
+  rgb_matrix_mode(0);
+  rgb_matrix_set_color_all(10, 10, 10);
+}
+
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    
+    int length = RAW_EPSIZE;
+    uint8_t response[length];
+    memset(response, 0, length);
+    response[0] = 'P';
+    // response[1] = record->event.key.row;
+    // response[2] = record->event.key.col;
+    response[1] = keycode >> 8;
+    response[2] = keycode & 0xFF;
+    response[3] = record->event.pressed ? 1 : 0;
+
+    // TODO - can this report the pressed state of all keys?
+
+    raw_hid_send(response, length);
+
+    return false;
+}
+
+void raw_hid_receive(uint8_t *data, uint8_t length) {
+
+    if(data[0] == 0x0c) { // check if firmware is correct
+        uint8_t response[length];
+        memset(response, 0, length);
+        response[0] = 0x0c;
+        response[1] = 1;
+
+        raw_hid_send(response, length);
+    } else if (data[0] == 0xff && data[1] == 0xee && data[2] == 0xdd ) {
+        bootloader_jump();
+    } else if (data[0] == 0x0b) {
+        rgb_matrix_set_color_all(data[1], data[2], data[3]);
+    } else if (data[0] == 0x0f) {
+        rgb_matrix_set_color(data[1], data[2], data[3], data[4]); // TODO - conform this to match the xy values sent with presses
     }
 }

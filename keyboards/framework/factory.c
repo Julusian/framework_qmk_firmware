@@ -84,6 +84,7 @@ __attribute__ ((weak))
 void enable_factory_mode(bool enable) {
 }
 
+/*
 bool handle_hid(uint8_t *data, uint8_t length) {
     uint8_t command_id = data[0];
     uint8_t *command_data = &(data[1]);
@@ -123,3 +124,4 @@ void raw_hid_receive(uint8_t *data, uint8_t length) {
   handle_hid(data, length);
 }
 #endif
+*/

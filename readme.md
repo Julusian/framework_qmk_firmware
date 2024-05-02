@@ -1,40 +1,63 @@
-# THIS IS THE DEVELOP BRANCH
+# Framework macropad as raw hid device
 
-Warning- This is the `develop` branch of QMK Firmware. You may encounter broken code here. Please see [Breaking Changes](https://docs.qmk.fm/#/breaking_changes) for more information.
+This is a custom firmware for the framework macropad based on [QMK](https://qmk.fm/).
+It builds on the QMK firmware [provided by framework](https://github.com/FrameworkComputer/qmk_firmware), but replaces the normal keyboard functionality with a simple raw hid device. This is intended to be used with an application to take exclusive control and use it similarly to if it were a midi device.
 
-# Quantum Mechanical Keyboard Firmware
+## Flashing
 
-[![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)
-[![Discord](https://img.shields.io/discord/440868230475677696.svg)](https://discord.gg/Uq7gcHh)
-[![Docs Status](https://img.shields.io/badge/docs-ready-orange.svg)](https://docs.qmk.fm)
-[![GitHub contributors](https://img.shields.io/github/contributors/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/pulse/monthly)
-[![GitHub forks](https://img.shields.io/github/forks/qmk/qmk_firmware.svg?style=social&label=Fork)](https://github.com/qmk/qmk_firmware/)
+-   Follow the [setup guide](https://docs.qmk.fm/#/newbs_getting_started) for QMK
+-   Put the macropad into bootloader mode, by holding 2 + 6 (if it were a numpad) while sliding the trackpad into place (this action is what connects the macropad to usb)
+-   Run `qmk flash -kb framework/macropad -km default` to build and flash the firmware
 
-This is a keyboard firmware based on the [tmk\_keyboard firmware](https://github.com/tmk/tmk_keyboard) with some useful features for Atmel AVR and ARM controllers, and more specifically, the [OLKB product line](https://olkb.com), the [ErgoDox EZ](https://ergodox-ez.com) keyboard, and the [Clueboard product line](https://clueboard.co).
+## Restoring original firmware
 
-## Documentation
+The process is identical to flashing the firmware, but using a clone of the latest release of the official firmware [from here](https://github.com/FrameworkComputer/qmk_firmware/releases)
 
-* [See the official documentation on docs.qmk.fm](https://docs.qmk.fm)
+## HID protocol
 
-The docs are powered by [Docsify](https://docsify.js.org/) and hosted on [GitHub](/docs/). They are also viewable offline; see [Previewing the Documentation](https://docs.qmk.fm/#/contributing?id=previewing-the-documentation) for more details.
+### Received messages
 
-You can request changes by making a fork and opening a [pull request](https://github.com/qmk/qmk_firmware/pulls), or by clicking the "Edit this page" link at the bottom of any page.
+When a key is pressed the macropad will send a hid message of 32 bytes, with the following meanings:
 
-## Supported Keyboards
+-   Byte 0 = 0x50 - This identifies the type of the message as a press
+-   Byte 1 = the x coordinate (1 - 4)
+-   Byte 2 = the y coordinate (1 - 6)
+-   Byte 3 = whether the button is pressed (1) or released (0)
 
-* [Planck](/keyboards/planck/)
-* [Preonic](/keyboards/preonic/)
-* [ErgoDox EZ](/keyboards/ergodox_ez/)
-* [Clueboard](/keyboards/clueboard/)
-* [Cluepad](/keyboards/clueboard/17/)
-* [Atreus](/keyboards/atreus/)
+### Sent messages
 
-The project also includes community support for [lots of other keyboards](/keyboards/).
+All messages sent to the macropad must be 32 bytes in length.
 
-## Maintainers
+#### Check version:
 
-QMK is developed and maintained by Jack Humbert of OLKB with contributions from the community, and of course, [Hasu](https://github.com/tmk). The OLKB product firmwares are maintained by [Jack Humbert](https://github.com/jackhumbert), the Ergodox EZ by [ZSA Technology Labs](https://github.com/zsa), the Clueboard by [Zach White](https://github.com/skullydazed), and the Atreus by [Phil Hagelberg](https://github.com/technomancy).
+-   Byte 0 = 0x0c
+-   Byte 1 = 0x01 - the revision of the protocol you are expecting to use
 
-## Official Website
+This will respond with:
 
-[qmk.fm](https://qmk.fm) is the official website of QMK, where you can find links to this page, the documentation, and the keyboards supported by QMK.
+-   Byte 0 = 0x0c
+-   Byte 1 = 0x01 - in later revisions this may be greater than 1, to indicate support for newer functionality
+
+#### Set all button leds
+
+-   Byte 0 = 0x0b
+-   Byte 1 = red value
+-   Byte 2 = green value
+-   Byte 3 = blue value
+
+#### Set single button led
+
+-   Byte 0 = 0x0f
+-   Byte 1 = the x coordinate (1 - 4)
+-   Byte 2 = the y coordinate (1 - 6)
+-   Byte 3 = red value
+-   Byte 4 = green value
+-   Byte 5 = blue value
+
+#### Enter bootloader
+
+This will immediately enter the bootloader, allowing for easier firmware flashing
+
+-   Byte 0 = 0xff
+-   Byte 1 = 0xee
+-   Byte 2 = 0xdd

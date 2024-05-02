@@ -93,7 +93,7 @@ void keyboard_post_init_user(void) {
 
   rgb_matrix_enable();
   rgb_matrix_mode(0);
-  rgb_matrix_set_color_all(10, 10, 10);
+  rgb_matrix_set_color_all(0, 0, 0);
 }
 
 

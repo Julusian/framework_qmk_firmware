@@ -1,6 +1,9 @@
 // Copyright 2022 Framework Computer
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#define RAW_USAGE_PAGE 0xFFDD
+#define RAW_USAGE_ID 0x61
+
 #define MATRIX_COLS 8
 #define MATRIX_ROWS 4
 
